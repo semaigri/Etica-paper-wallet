@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Etica Cold Wallet Generator</title>
+    <meta name="description" content="A lightweight, client-side, reliable, fast, open-source universal cold wallet generator supporting almost every major cryptocurrency">
+    <meta name="keywords" content="minimal, reliable, fast, universal, cold, wallet, generator, offline, etics, eth, erc20, token, cryptocurrency">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2E3440;
+            font-family: 'Fira Mono', sans-serif;
+            font-size: 14px;
+            color: #D8DEE9;
+        }
+
+        #container {
+            text-align: center;
+            background-color: #3B4252;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('img/back.png'); 
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Adjusted text styles for better visibility */
+        h1, th, td {
+            color: #ECEFF4;
+        }
+
+        .titlemain {
+            font-size: 24px;
+            color: #81A1C1;
+            margin-bottom: 20px;
+        }
+
+        /* Add your additional styles here */
+
+        .qr-code {
+            margin-left: 0; /* Reset margin */
+            margin-top: 20px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin-right: 20px;
+        }
+
+        .header-with-margin-top {
+            margin-top: 10px; /* Adjust the value as needed */
+        }
+
+        /* Buttons */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #5E81AC;
+            color: #ECEFF4;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Print button */
+        button:last-child {
+            background-color: #BF616A;
+        }
+
+        /* Print styles */
+        @media print {
+    body {
+        display: block;
+        background-color: #3B4252;
+        color: #D8DEE9;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('img/back.png'); 
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    #container {
+        background-color: white;
+        padding: 20px;
+        box-shadow: none;
+    }
+
+            .titlemain {
+                color: #3B4252;
+            }
+
+            .logo {
+                display: none;
+            }
+
+            .qr-code {
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+<body onload="init()">
+    <div id="container">
+        <h1 class="titlemain"><span id="currencyName">Etica Paper Wallet</span></h1>
+        <div class="button-container">
+            <button onclick="generate()">Generate</button>
+            <button onclick="window.print()">Print</button>
+        </div>
+        <img src="img/etica.png" class="logo center" alt="etica">
+        <table>
+            <tr>
+                <th class="grayHeaders">Public Address <span id="shareColor">(SHARE)</span></th>
+            </tr>
+            <tr>
+                <td><div id="public">Click 'Generate' to get Public Address</div></td>
+            </tr>
+            <tr>
+                <td><div id="public_qr" class="qr-code"></div></td>
+            </tr>
+            <tr>
+                <th class="grayHeaders">
+                    <div id="secretLabel">Private Key <span id="secretColor">(SECRET)</span></div>
+                </th>
+            </tr>
+            <tr>
+                <td><div id="secret">Click 'Generate' to get Private Key</div></td>
+            </tr>
+            <tr>
+                <td><div id="secret_qr" class="qr-code"></div></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        let isGenerated = false;
+        let pubKey = "";
+        let privKey = "";
+
+        function init() {
+            if (!isGenerated) {
+                document.getElementById("public").textContent = "Click 'Generate' to get Public Address";
+                document.getElementById("secret").textContent = "Click 'Generate' to get Private Key";
+            }
+        }
+
+        function generate() {
+            if (!isGenerated) {
+                const account = new Web3EthAccounts();
+                const keyPair = account.create();
+                pubKey = JSON.parse(JSON.stringify(keyPair.address));
+                privKey = JSON.parse(JSON.stringify(keyPair.privateKey));
+                isGenerated = true;
+            }
+            document.getElementById("public").textContent = pubKey;
+            document.getElementById("secret").textContent = privKey;
+            document.getElementById("public_qr").textContent = "";
+            document.getElementById("secret_qr").textContent = "";
+            new QRCode(document.getElementById("public_qr"), {
+                text: pubKey,
+                width: 128,
+                height: 128,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            new QRCode(document.getElementById("secret_qr"), {
+                text: privKey,
+                width: 128,
+                height: 128,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        const urlParam = window.location.search.substring(1);
+        if (urlParam) {
+            document.getElementById("currencyName").textContent = urlParam;
+            document.title = urlParam + " Cold Wallet";
+        }
+    </script>
+    <script src="js/web3-eth-accounts.js"></script>
+    <script src="js/qrcode.js"></script>
+</body>
+</html>
